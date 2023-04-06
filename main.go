@@ -1,7 +1,10 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
+	// "errors"
 )
 
 /*store book data in memory => struct tags ie `json:"title"`
@@ -23,4 +26,12 @@ var books = []book{
 
 func main (){
 	router := gin.Default()
+	router.GET("/books", getBooks)
+
+	router.Run("localhost:8080") //attach the router to an http.Server and start the server
+}
+
+// getBooks responds with the list of all books as JSON.
+func getBooks(c *gin.Context){
+	c.IndentedJSON(http.StatusOK, books)
 }
