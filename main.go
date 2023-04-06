@@ -32,6 +32,7 @@ func main (){
 	router.GET("/books/:id", getBook)
 	router.POST("/books", postBook)
 	router.PATCH("/checkout", checkoutBook)
+	router.PATCH("/return", returnBook)
 
 	router.Run("localhost:8080") //attach the router to an http.Server and start the server
 }
@@ -124,4 +125,24 @@ func checkoutBook(c *gin.Context){
 	book.Quantity -= 1
 	c.IndentedJSON(http.StatusOK, book)
 
+}
+
+func returnBook(c *gin.Context) {
+	id, ok := c.GetQuery("id")
+
+	if !ok  {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "missing id query parameter"})
+		return
+	}
+
+	book, err := getBookByID(id)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "book not found"})
+		return
+	}
+
+	// return book
+	book.Quantity += 1
+	c.IndentedJSON(http.StatusOK, book)
 }
