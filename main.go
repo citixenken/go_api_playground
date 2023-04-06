@@ -27,11 +27,27 @@ var books = []book{
 func main (){
 	router := gin.Default()
 	router.GET("/books", getBooks)
+	router.POST("/books", postBook)
 
 	router.Run("localhost:8080") //attach the router to an http.Server and start the server
 }
 
 // getBooks responds with the list of all books as JSON.
+//*gin.Context => stores info relating to a specific request
 func getBooks(c *gin.Context){
 	c.IndentedJSON(http.StatusOK, books)
+}
+
+// postBook adds a book from JSON received in the request body.
+func postBook(c *gin.Context){
+	var newBook book
+
+	// Call BindJSON to bind the received JSON to
+    // newBook
+	if err := c.BindJSON(&newBook); err != nil {
+		return
+	}
+	// Add the new book to the slice.
+	books = append(books, newBook)
+	c.IndentedJSON(http.StatusCreated, newBook)
 }
