@@ -3,8 +3,9 @@ package main
 import (
 	"net/http"
 
+	"errors"
+
 	"github.com/gin-gonic/gin"
-	// "errors"
 )
 
 /*store book data in memory => struct tags ie `json:"title"`
@@ -27,6 +28,8 @@ var books = []book{
 func main (){
 	router := gin.Default()
 	router.GET("/books", getBooks)
+	// router.GET("/books/:id", getBookByID)
+	router.GET("/books/:id", getBook)
 	router.POST("/books", postBook)
 
 	router.Run("localhost:8080") //attach the router to an http.Server and start the server
@@ -50,4 +53,45 @@ func postBook(c *gin.Context){
 	// Add the new book to the slice.
 	books = append(books, newBook)
 	c.IndentedJSON(http.StatusCreated, newBook)
+}
+
+// getBookByID locates the book whose ID value matches the id
+// parameter sent by the client, then returns that book as a response.
+// func getBookByID(c *gin.Context) {
+// 	id := c.Param("id")
+
+// 	// Loop over the list of books, looking for
+//     // a book whose ID value matches the parameter.
+// 	for _, b := range books {
+// 		if b.ID == id {
+// 			c.IndentedJSON(http.StatusOK, b)
+// 			return
+// 		}
+// 	}
+// 	c.IndentedJSON(http.StatusNotFound,gin.H{"message":"book not found"})
+// }
+
+// alternatively;
+// 1. helper function
+func getBookByID(id string) (*book, error) {
+	for i,b := range books {
+		if b.ID == id {
+			return &books[i], nil
+		}
+	}
+	return nil, errors.New("book not found")
+}
+
+// 2. Actual getBook code
+func getBook(c *gin.Context){
+	id := c.Param("id")
+
+	book, err := getBookByID(id)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "book not found"})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, book)
 }
